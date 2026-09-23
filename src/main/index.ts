@@ -65,9 +65,9 @@ async function setupORPC() {
 app.whenReady().then(async () => {
   try {
     createWindow();
+    await setupORPC();
     await installDevTools();
     checkForUpdates();
-    await setupORPC();
   } catch (error) {
     console.error("Error during app initialization:", error);
   }
