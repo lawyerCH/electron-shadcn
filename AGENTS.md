@@ -80,6 +80,47 @@ biome.jsonc                                      # extends ultracite/biome/core 
 
 在**四个**配置里都设置了：`tsconfig.json`、`vite.main.config.mts`、`vite.renderer.config.mts`、`vitest.config.ts`。新增工具时务必注册到这里 —— TypeScript 自身不会让 Vite 在运行时识别别名。
 
+## 命名规范 / Naming Conventions
+
+新文件 / 文件夹按以下规则命名。**约定从下一个新文件开始生效**；已有文件不一致的，下一次触碰该文件时顺手统一。
+
+### 文件夹
+
+| 类型 | 风格 | 示例 |
+|---|---|---|
+| 进程目录 | 单数小写 | `main/`、`preload/`、`renderer/`、`shared/` |
+| IPC area | 单数小写 | `app/`、`shell/`、`theme/`、`window/`（在 `src/main/ipc/` 下） |
+| 业务模块 | kebab-case | `components/`、`layouts/`、`localization/`、`actions/` |
+| shadcn 组件 | `ui/` 子目录 | `components/ui/`（由 `bump-ui` 维护，**不要手改命名**） |
+| 单文件目录（仅装 index.ts） | 任意，按上面规则 | `constants/`、`utils/` |
+
+### 文件
+
+| 类型 | 风格 | 示例 |
+|---|---|---|
+| React 组件（default export） | **PascalCase** + `.tsx` | `Button.tsx`、`DragWindowRegion.tsx` |
+| Hook | `use*` 前缀 + camelCase + `.ts`/`.tsx` | `useTheme.ts`、`useLocalStorage.ts` |
+| oRPC handler / 业务模块 | kebab-case + `.ts` | `theme/handlers.ts`、`window/handlers.ts` |
+| 工具函数 | kebab-case 或 camelCase + `.ts`（同一目录内统一） | `tailwind.ts`、`path.ts`、`router.ts` |
+| 类型 / Schema | kebab-case + `.ts` | `theme-mode.ts`、`shell/schemas.ts` |
+| 路由组件 | 文件名 = 路由名 + `.tsx` | `index.tsx`、`second.tsx` |
+| 入口 | `index.ts` 或 `main.tsx`（视进程） | `src/main/index.ts`、`src/renderer/main.tsx` |
+| 自动生成 | `<name>.gen.ts` | `routeTree.gen.ts`（**绝对不要手工编辑**） |
+
+### 文件与导出对齐
+
+- **文件名 = 默认导出名**：组件 `Button.tsx` 导出 `Button`，工具 `tailwind.ts` 导出 `cn`
+- **一个文件一个主要导出**（避免 barrel 重导出）
+- **同名文件夹装同名主文件**：目录 `foo/` 下必有 `foo.ts`（或 `foo/index.ts`），其他文件是辅助
+
+### 反模式
+
+- `utils/misc.ts`、`helpers/index.ts` 这种"杂物筐"目录
+- `component.tsx` 与组件 `Component` 不一致（找不到）
+- 一文件多组件（不利于 tree-shaking 与 lint）
+
+---
+
 ## Vite / 构建注意点（容易踩坑）
 
 - 渲染层开发服务器固定在 **5174 端口**（`strictPort: false`，端口被占时静默回退，不会大声报错）。
@@ -90,9 +131,9 @@ biome.jsonc                                      # extends ultracite/biome/core 
 
 ## 路由（TanStack Router）
 
-- 文件路由在 `src/renderer/routes/`。新增 `foo.tsx` 后 `routeTree.gen.ts` 会在 `npm run start` 时重新生成。
+- 文件路由在 `src/renderer/routes/`。新增 `foo.tsx` 后 `src/renderer/routeTree.gen.ts` 会在 `npm run start` 时重新生成。
 - Router 使用 `createMemoryHistory` —— 没有 URL 栏，别指望深链路由"开箱即用"。
-- `src/routeTree.gen.ts` 入库（未被 gitignore），但**绝对不要手工编辑** —— Biome 已忽略它，CI 也可能重新生成。
+- `src/renderer/routeTree.gen.ts` 入库（未被 gitignore），但**绝对不要手工编辑** —— Biome 已忽略它，CI 也可能重新生成。
 
 ## 样式
 
