@@ -153,3 +153,37 @@ AI 工作流：
 ```
 
 `.agents/rules/STATE.md`（人在上次 session 末尾更新）记录：进行中任务 / 决策 / 待办 / 已知坑。
+
+## 文件头注释约定 / File Header Convention
+
+**新创建的文件**（`.ts` / `.tsx` / `.css`）必须在文件开头用 JSDoc 风格写一段说明，写清"为什么存在"和"主要职责"。完整规范见 `.agents/rules/STYLE.md` 末尾"新文件头注释模板"。
+
+规则：
+
+- 1-5 行，说"为什么 / 做什么"——**不重复代码**
+- 跨进程 / 跨模块的文件必须写清**被谁使用**、**对外暴露什么**
+- IPC handler / action 文件：写清**对应 oRPC area + proc 名**
+- 工具函数文件：写清**典型用法 1 行**
+- 修改现有文件：保留并更新头部说明（不要删）
+
+## `src/shared/` 边界 / Shared Boundary
+
+`src/shared/` 只放**真正被 main / preload / renderer 多进程共用**的内容。当前：
+
+```
+src/shared/
+├── constants/    # LOCAL_STORAGE_KEYS、IPC_CHANNELS、ENVIRONMENT_VARIABLES、inDevelopment
+├── types/        # ThemeMode 等跨进程类型
+└── types.d.ts    # 全局 ambient 声明
+```
+
+未来可能扩展（按需新增，不要提前创建空文件）：
+
+- `errors.ts` —— IPC 共享的错误类型 / 错误码
+- `validators.ts` —— 跨进程共用的 Zod schema（IPC 契约）
+- `events.ts` —— 自定义事件名常量
+- `config.ts` —— 运行时共享的默认配置
+
+**判定准则**：某个东西只在一个进程用 → 放那个进程的目录下；两个或以上进程用 → 才进 `src/shared/`。
+
+**反模式**：把工具函数、组件、IPC handler 放进 `src/shared/` —— 它们不属于"跨进程共享"语义。

@@ -183,6 +183,64 @@ AI 在阶段二开始前必读本文件；阶段三自检时回看。
 
 ---
 
+## 新文件头注释模板 / New File Header Template
+
+每个新文件开头写一段 JSDoc 风格的注释，说明"为什么"和"做什么"。
+
+### 模板
+
+```ts
+/**
+ * 文件目的（为什么存在）
+ * - 关键职责 1
+ * - 关键职责 2
+ */
+```
+
+### 各场景示例
+
+**IPC handler（main 侧）** —— `src/main/ipc/<area>/handlers.ts`：
+```ts
+/**
+ * <area> area 的 oRPC 过程集合
+ * - proc1: 做什么
+ * - proc2: 做什么
+ * 通过 src/renderer/ipc-manager 暴露给渲染层
+ */
+```
+
+**Action 封装（renderer 侧）** —— `src/renderer/actions/<area>.ts`：
+```ts
+/**
+ * <area> IPC 客户端封装
+ * - 包装 ipc.client.<area>.* 给 React 组件用
+ * - 处理 localStorage 持久化（如适用）
+ */
+```
+
+**工具函数** —— `src/utils/<x>.ts`：
+```ts
+/**
+ * <功能简述>
+ * 用法: <一行示例>
+ */
+```
+
+**React 组件** —— `src/renderer/components/<name>.tsx`：
+```ts
+/**
+ * <组件作用>，被 <哪个父组件> 使用
+ * - 接收 <关键 props>
+ */
+```
+
+### 反模式
+- 注释里**重复代码做了什么**（函数名 + 类型签名已经说明）
+- 注释**超过 6 行**（说明这块做太多事，应该拆）
+- 注释里**包含过时内容**（代码改了不改注释比没注释更糟）
+
+---
+
 ## 硬规则 / Hard Rules（汇总，不商量）
 
 - **linter / typecheck / test / build** 全部通过（门 2）
