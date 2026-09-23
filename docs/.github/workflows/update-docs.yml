@@ -1,0 +1,92 @@
+name: Documentation Update Agent
+
+on:
+  repository_dispatch:
+    types:
+      - project-docs-update
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Docs Repository
+        uses: actions/checkout@v4
+
+      - name: Fetch PR Metadata
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.CROSS_REPO_DISPATCH_TOKEN }}
+        run: |
+          gh pr view \
+            ${{ github.event.client_payload.pr_number }} \
+            --repo ${{ github.event.client_payload.repository }} \
+            --json title,body,files \
+            > pr.json
+
+      - name: Checkout Source Repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.client_payload.repository }}
+          path: source-project
+          token: ${{ secrets.CROSS_REPO_DISPATCH_TOKEN }}
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install Mistral Vibe
+        run: uv tool install mistral-vibe
+
+      - name: Run Documentation Agent
+        env:
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+        run: |
+          vibe \
+            --max-turns 20 \
+            --prompt "
+            Repository:
+            ${{ github.event.client_payload.repository }}
+
+            Pull Request:
+            $(cat pr.json)
+
+            Source code is available in:
+            ./source-project
+
+            Documentation must only be updated under:
+            ./content
+
+            Follow all instructions defined in AGENTS.md.
+
+            Analyze the PR changes and update the relevant project documentation.
+            Prefer targeted edits.
+            Preserve MDX frontmatter.
+            Do not modify unrelated projects.
+            "
+
+      - name: Remove Source Repository
+        run: rm -rf source-project
+
+      - name: Validate Documentation
+        run: |
+          pnpm install
+          pnpm build
+
+      - name: Create Documentation PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "docs: update documentation"
+          branch: "docs/update-${{ github.event.client_payload.pr_number }}"
+          title: "docs: update documentation for PR #${{ github.event.client_payload.pr_number }}"
+          body: |
+            Automated documentation update.
+
+            Source Repository:
+            ${{ github.event.client_payload.repository }}
+
+            Source PR:
+            #${{ github.event.client_payload.pr_number }}

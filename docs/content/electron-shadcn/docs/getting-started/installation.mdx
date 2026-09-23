@@ -1,0 +1,69 @@
+---
+title: Installation
+description: Get started with electron-shadcn in minutes
+---
+
+import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+import { Callout } from "fumadocs-ui/components/callout";
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+- [Node.js](https://nodejs.org) (version 24 LTS or higher)
+- [npm](https://www.npmjs.com) (comes with Node.js) or your preferred package manager
+- [Git](https://git-scm.com) for cloning the repository
+
+## Quick Start
+
+<Steps>
+<Step>
+### Clone the Repository
+
+You can either clone the repository directly or use it as a GitHub template.
+
+<Tabs items={["Clone", "GitHub Template"]}>
+<Tab value="Clone">
+```bash
+git clone https://github.com/LuanRoger/electron-shadcn.git
+cd electron-shadcn
+```
+</Tab>
+<Tab value="GitHub Template">
+1. Go to [electron-shadcn on GitHub](https://github.com/LuanRoger/electron-shadcn)
+2. Click the **"Use this template"** button
+3. Choose **"Create a new repository"**
+4. Clone your new repository
+</Tab>
+</Tabs>
+</Step>
+
+<Step>
+### Install Dependencies
+
+```bash
+npm install
+```
+
+This will install all the required dependencies including Electron, React, Vite, and all the pre-configured tools.
+</Step>
+
+<Step>
+### Start the Development Server
+
+```bash
+npm run start
+```
+
+This will launch the Electron app in development mode with hot reload enabled.
+</Step>
+</Steps>
+
+## What's Next?
+
+After installation, you can start building your app by modifying `/src/routes/index.tsx`.
+
+<Callout type="info">
+You can delete the `/src/routes/second.tsx` file if you don't need a second page in your application.
+</Callout>

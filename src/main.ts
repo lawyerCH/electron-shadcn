@@ -43,7 +43,7 @@ function checkForUpdates() {
 
   updateElectronApp({
     updateSource: {
-      repo: "LuanRoger/electron-shadcn",
+      repo: "lawyerch/electron-shadcn",
       type: UpdateSourceType.ElectronPublicUpdateService,
     },
   });

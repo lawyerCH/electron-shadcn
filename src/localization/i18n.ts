@@ -8,7 +8,7 @@ i18n.use(initReactI18next).init({
       translation: {
         appName: "electron-shadcn",
         documentation: "Documentation",
-        madeBy: "Made by LuanRoger",
+        madeBy: "Made by lawyerch",
         titleHomePage: "Home Page",
         titleSecondPage: "Second Page",
       },
@@ -17,7 +17,7 @@ i18n.use(initReactI18next).init({
       translation: {
         appName: "electron-shadcn",
         documentation: "Documentação",
-        madeBy: "Feito por LuanRoger",
+        madeBy: "Feito por lawyerch",
         titleHomePage: "Página Inicial",
         titleSecondPage: "Segunda Página",
       },

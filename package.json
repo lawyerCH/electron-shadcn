@@ -4,7 +4,7 @@
   "private": true,
   "description": "Electron Forge with shadcn-ui (Vite + Typescript)",
   "license": "MIT",
-  "author": "ROG <luanroger.dev@gmail.com>",
+  "author": "lawyerch",
   "main": ".vite/build/main.js",
   "scripts": {
     "bump-ui": "tsx ./scripts/bump-ui.ts",

@@ -106,7 +106,7 @@ CI 通过 `xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24"` 跑�
 ## 发布
 
 - `npm run publish` 通过 `@electron-forge/publisher-github` 创建 **draft** GitHub release，发布前务必在 GitHub 上审阅。
-- 自动更新指向 `LuanRoger/electron-shadcn`，使用 Electron Public Update Service。**如果 fork**，记得改 `src/main.ts`（`checkForUpdates`）的 `repo` 与 `forge.config.ts` 的 publisher `repository.owner/name`。
+- 自动更新指向 `lawyerch/electron-shadcn`，使用 Electron Public Update Service。**如果 fork**，记得改 `src/main.ts`（`checkForUpdates`）的 `repo` 与 `forge.config.ts` 的 publisher `repository.owner/name`。
 - `.github/workflows/publish.yaml` 仅 `workflow_dispatch` 触发且运行在 `windows-latest` —— 推送 tag 不会自动发布。
 
 ## 容易踩的坑

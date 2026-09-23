@@ -1,0 +1,732 @@
+---
+title: Overview
+description: Comprehensive technical overview of the electron-shadcn template architecture, core technologies, and implementation details
+---
+
+import { File, Folder, Files } from "fumadocs-ui/components/files";
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+electron-shadcn is a production-ready Electron application template that combines the power of Electron with modern React development practices, specifically integrating the shadcn/ui component system. It's designed to help developers quickly bootstrap beautiful, functional desktop applications with minimal setup.
+
+Get started in minutes with pre-configured Electron, React, TypeScript, and shadcn/ui. This template is perfect for building cross-platform desktop applications with a modern tech stack.
+
+---
+
+## Architecture
+
+The template follows a **modular, type-safe architecture** with clear separation of concerns between Electron's processes:
+
+<Files>
+  <Folder name="src" defaultOpen>
+    <File name="main.ts" />
+    <File name="preload.ts" />
+    <File name="renderer.ts" />
+    <File name="app.tsx" />
+    <Folder name="ipc" defaultOpen>
+      <File name="router.ts" />
+      <File name="handler.ts" />
+      <File name="manager.ts" />
+      <File name="context.ts" />
+      <Folder name="app" defaultOpen>
+        <File name="index.ts" />
+        <File name="handlers.ts" />
+        <File name="schemas.ts" />
+      </Folder>
+      <Folder name="shell">
+        <File name="index.ts" />
+        <File name="handlers.ts" />
+        <File name="schemas.ts" />
+      </Folder>
+      <Folder name="theme">
+        <File name="index.ts" />
+        <File name="handlers.ts" />
+        <File name="schemas.ts" />
+      </Folder>
+      <Folder name="window">
+        <File name="index.ts" />
+        <File name="handlers.ts" />
+      </Folder>
+    </Folder>
+    <Folder name="actions">
+      <File name="app.ts" />
+      <File name="language.ts" />
+      <File name="shell.ts" />
+      <File name="theme.ts" />
+      <File name="window.ts" />
+    </Folder>
+    <Folder name="components">
+      <Folder name="ui">
+        <File name="button.tsx" />
+        <File name="navigation-menu.tsx" />
+        <File name="toggle.tsx" />
+      </Folder>
+      <File name="drag-window-region.tsx" />
+      <File name="external-link.tsx" />
+      <File name="lang-toggle.tsx" />
+      <File name="navigation-menu.tsx" />
+      <File name="toggle-theme.tsx" />
+    </Folder>
+    <Folder name="constants" />
+    <Folder name="layouts" />
+    <Folder name="localization" />
+    <Folder name="routes">
+      <File name="index.tsx" />
+      <File name="second.tsx" />
+    </Folder>
+    <Folder name="styles" />
+    <Folder name="tests" />
+    <Folder name="types" />
+    <File name="types.d.ts" />
+    <Folder name="utils" />
+  </Folder>
+  <File name="forge.config.ts" />
+  <File name="package.json" />
+  <File name="tsconfig.json" />
+  <File name="vite.main.config.mts" />
+  <File name="vite.preload.config.mts" />
+  <File name="vite.renderer.config.mts" />
+</Files>
+
+### Process Architecture
+
+<Steps>
+  <Step>
+    ### Main Process
+    
+    Manages Electron app lifecycle, creates BrowserWindow instances, and sets up IPC handlers.
+    
+    ```typescript title="main.ts"
+    import { app, BrowserWindow } from "electron";
+    import { ipcMain } from "electron/main";
+    import { ipcContext } from "./ipc/context";
+
+    function createWindow() {
+      const mainWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        webPreferences: {
+          devTools: inDevelopment,
+          contextIsolation: true,
+          nodeIntegration: true,
+        },
+        titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "hidden",
+      });
+      ipcContext.setMainWindow(mainWindow);
+      // ...
+    }
+
+    app.whenReady().then(async () => {
+      createWindow();
+      await installExtensions();
+      checkForUpdates();
+      await setupORPC();
+    });
+    ```
+  </Step>
+
+  <Step>
+    ### Preload Process
+    
+    Bridge between main and renderer processes, exposes limited Electron APIs to renderer.
+    
+    ```typescript title="preload.ts"
+    import { ipcRenderer } from "electron";
+    import { IPC_CHANNELS } from "./constants";
+
+    window.addEventListener("message", (event) => {
+      if (event.data === IPC_CHANNELS.START_ORPC_SERVER) {
+        const [serverPort] = event.ports;
+        ipcRenderer.postMessage(IPC_CHANNELS.START_ORPC_SERVER, null, [serverPort]);
+      }
+    });
+    ```
+  </Step>
+
+  <Step>
+    ### Renderer Process
+    
+    React application running in the browser context with TanStack Router.
+    
+    ```tsx title="app.tsx"
+    import { RouterProvider } from "@tanstack/react-router";
+    import React from "react";
+    import { createRoot } from "react-dom/client";
+    import { router } from "./utils/routes";
+    import "./localization/i18n";
+
+    export default function App() {
+      return <RouterProvider router={router} />;
+    }
+
+    const container = document.getElementById("app");
+    const root = createRoot(container);
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Core Technologies
+
+<Tabs items={['Runtime & Build', 'UI Layer', 'IPC & Communication', 'Testing', 'Code Quality']}>
+  <Tab value="Runtime & Build">
+    ### Runtime & Build
+    
+    <TypeTable type={{
+      electron: {
+        description: 'Cross-platform desktop application framework',
+        type: 'string',
+        default: '42.x',
+      },
+      vite: {
+        description: 'Modern build tool with HMR support',
+        type: 'string',
+        default: '8.x',
+      },
+      forge: {
+        description: 'Packaging and distribution toolchain',
+        type: 'string',
+        default: '7.x',
+      },
+      typescript: {
+        description: 'Type safety with latest features',
+        type: 'string',
+        default: '6.x',
+      },
+    }} />
+  </Tab>
+
+  <Tab value="UI Layer">
+    ### UI Layer
+    
+    <TypeTable type={{
+      react: {
+        description: 'Modern React with React Compiler',
+        type: 'string',
+        default: '19.2.x',
+      },
+      tailwind: {
+        description: 'Utility-first CSS framework',
+        type: 'string',
+        default: '4.3.x',
+      },
+      shadcn: {
+        description: 'Radix-based component library',
+        type: 'string',
+        default: '4.x',
+      },
+      tanstackRouter: {
+        description: 'File-based routing with type safety',
+        type: 'string',
+        default: '1.x',
+      },
+      reactQuery: {
+        description: 'Server state management',
+        type: 'string',
+        default: '5.x',
+      },
+      i18next: {
+        description: 'Internationalization support',
+        type: 'string',
+        default: '26.x',
+      },
+      lucide: {
+        description: 'Icon library',
+        type: 'string',
+        default: '1.x',
+      },
+      geist: {
+        description: 'Default font family',
+        type: 'string',
+        default: '5.x',
+      },
+    }} />
+  </Tab>
+
+  <Tab value="IPC & Communication">
+    ### IPC & Communication
+    
+    <TypeTable type={{
+      orpc: {
+        description: 'Type-safe inter-process communication',
+        type: 'string',
+        default: '1.x',
+      },
+      zod: {
+        description: 'Runtime validation for IPC messages',
+        type: 'string',
+        default: '4.x',
+      },
+      contextIsolation: {
+        description: 'Security feature enabled by default',
+        type: 'boolean',
+        default: true,
+      },
+    }} />
+  </Tab>
+
+  <Tab value="Testing">
+    ### Testing
+    
+    <TypeTable type={{
+      vitest: {
+        description: 'Fast unit testing framework',
+        type: 'string',
+        default: '4.x',
+      },
+      playwright: {
+        description: 'End-to-end testing with Electron support',
+        type: 'string',
+        default: '1.x',
+      },
+      reactTestingLibrary: {
+        description: 'Component testing utilities',
+        type: 'string',
+        default: '16.x',
+      },
+    }} />
+  </Tab>
+
+  <Tab value="Code Quality">
+    ### Code Quality
+    
+    <TypeTable type={{
+      ultracite: {
+        description: 'Code formatting and linting wrapper',
+        type: 'string',
+        default: '7.x',
+      },
+      biome: {
+        description: 'All-in-one code linter and formatter',
+        type: 'string',
+        default: '2.x',
+      },
+      prettier: {
+        description: 'Additional formatting support',
+        type: 'string',
+        default: '3.x',
+      },
+    }} />
+  </Tab>
+</Tabs>
+
+---
+
+## Key Implementation Details
+
+### Type-Safe IPC with oRPC
+
+The template implements a sophisticated IPC system using [oRPC](https://orpc.unnoq.com) that addresses Electron's traditional IPC challenges:
+
+Key benefits of this approach:
+
+- MessagePort-based communication for security
+- Domain-specific routers for modular organization
+- Zod validation for runtime type safety
+- Context injection via oRPC middleware
+
+<Steps>
+  <Step>
+    #### IPC Initialization Flow
+    
+    1. Main process creates BrowserWindow with preload script
+    2. Preload script listens for `START_ORPC_SERVER` message
+    3. Renderer creates MessageChannel with two ports
+    4. Client port stays in renderer, server port sent to main via `window.postMessage`
+    5. Main process receives port, starts oRPC server with router
+    6. Renderer creates oRPC client with client port
+    7. Type-safe IPC communication established
+  </Step>
+
+  <Step>
+    #### Example: Theme Handler with Zod Validation
+    
+    <Tabs items={['Schema', 'Handler', 'Router']}>
+      <Tab value="Schema">
+```typescript title="schemas.ts"
+import { z } from "zod";
+
+export const setThemeModeInputSchema = z.enum(["light", "dark", "system"]);
+```
+      </Tab>
+
+      <Tab value="Handler">
+```typescript title="handlers.ts"
+import { os } from "@orpc/server";
+import { nativeTheme } from "electron";
+import { setThemeModeInputSchema } from "./schemas";
+
+export const getCurrentThemeMode = os.handler(() => 
+  nativeTheme.themeSource
+);
+
+export const setThemeMode = os
+  .input(setThemeModeInputSchema)
+  .handler(({ input: mode }) => {
+    nativeTheme.themeSource = mode;
+    return nativeTheme.themeSource;
+  });
+```
+      </Tab>
+
+      <Tab value="Router">
+```typescript title="index.ts"
+export const theme = {
+  getCurrentThemeMode,
+  setThemeMode,
+  toggleThemeMode,
+};
+```
+      </Tab>
+    </Tabs>
+  </Step>
+</Steps>
+
+### Window Management
+
+The template uses a custom title bar implementation with hidden native title bar. Platform-specific styling is applied for macOS (`hiddenInset`) vs other platforms (`hidden`).
+
+```typescript title="Window Configuration"
+const mainWindow = new BrowserWindow({
+  width: 800,
+  height: 600,
+  webPreferences: {
+    devTools: inDevelopment,
+    contextIsolation: true,
+    nodeIntegration: true,
+    nodeIntegrationInSubFrames: false,
+    preload,
+  },
+  titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "hidden",
+  trafficLightPosition: process.platform === "darwin" ? { x: 5, y: 5 } : undefined,
+});
+```
+
+### Auto-Update System
+
+<Callout type="warning" title="Public Repositories Only">
+  Auto-update uses GitHub Releases as the update source. This only works for public GitHub repositories.
+  For private repositories, you need to setup a custom update server.
+</Callout>
+
+### React Compiler
+
+React Compiler is enabled by default, which automatically memoizes React components. This provides better performance without manual `useMemo`, `useCallback`, or `React.memo` usage.
+
+---
+
+## Intended Use Case
+
+This template is ideal for:
+
+This template is perfect for:
+
+- Desktop application development (Windows, macOS, Linux)
+- Rapid prototyping with modern tooling
+- Production-ready applications with testing and CI/CD
+- Type-safe development across all layers
+- International applications with i18n support
+- Accessible applications following WAI-ARIA standards
+
+---
+
+## Development Workflow
+
+<Tabs items={['Setup', 'Development', 'Testing', 'Building', 'Publishing']}>
+  <Tab value="Setup">
+    ### Setup
+    
+    <Steps>
+      <Step>
+        #### Clone the repository
+        
+        ```bash
+git clone https://github.com/LuanRoger/electron-shadcn.git
+        ```
+      </Step>
+
+      <Step>
+        #### Install dependencies
+        
+        ```bash
+cd electron-shadcn && npm install
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab value="Development">
+    ### Development
+    
+    <Steps>
+      <Step>
+        #### Start the application
+        
+        ```bash
+npm run start
+        ```
+        
+        Starts Vite dev server with HMR and Electron main process.
+      </Step>
+
+      <Step>
+        #### Modify the app
+        
+        Edit files in `/src/routes/` to customize your application.
+        Changes are reflected immediately thanks to HMR.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab value="Testing">
+    ### Testing
+    
+    <Steps>
+      <Step>
+        #### Run all tests
+        
+        ```bash
+npm run test:all
+        ```
+      </Step>
+
+      <Step>
+        #### Run unit tests
+        
+        ```bash
+npm run test:unit
+        ```
+      </Step>
+
+      <Step>
+        #### Run E2E tests
+        
+        ```bash
+npm run test:e2e
+        ```
+      </Step>
+
+      <Step>
+        #### Watch mode
+        
+        ```bash
+npm run test:watch
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab value="Building">
+    ### Building & Packaging
+    
+    <Steps>
+      <Step>
+        #### Package for current platform
+        
+        ```bash
+npm run package
+        ```
+      </Step>
+
+      <Step>
+        #### Build for all platforms
+        
+        ```bash
+npm run make
+        ```
+        
+        <Callout type="info">
+          Supported platforms: Windows (Squirrel/MSI), macOS (ZIP/DMG), Linux (Deb/RPM/ZIP)
+        </Callout>
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab value="Publishing">
+    ### Publishing
+    
+    <Steps>
+      <Step>
+        #### Create GitHub release
+        
+        ```bash
+npm run publish
+        ```
+        
+        <Callout type="warning">
+          Requires GITHUB_TOKEN environment variable with repo permissions.
+        </Callout>
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+---
+
+## Real-World Usage
+
+The template is used in production by several projects:
+
+<TypeTable type={{
+  yaste: {
+    description: 'Yet another super simple text editor',
+    type: 'string',
+    default: 'https://github.com/LuanRoger/yaste',
+  },
+  electricDrizzle: {
+    description: 'shadcn-ui with Drizzle ORM for Electron',
+    type: 'string',
+    default: 'https://github.com/LuanRoger/electric-drizzle',
+  },
+  wordleGame: {
+    description: 'Cross-platform Wordle game with custom API',
+    type: 'string',
+    default: 'https://github.com/masonyekta/wordle-game',
+  },
+  mehr: {
+    description: 'Modern local AI chatbot with Ollama',
+    type: 'string',
+    default: 'https://github.com/xmannii/MehrLocalChat',
+  },
+}} />
+
+---
+
+## Best Practices
+
+Follow these patterns when extending the template:
+
+<Tabs items={['IPC Methods', 'Components', 'Pages']}>
+  <Tab value="IPC Methods">
+    ### Adding New IPC Methods
+    
+    <Steps>
+      <Step>Create a new domain folder in `src/ipc/` or use existing one</Step>
+      <Step>Define Zod schemas in `schemas.ts`</Step>
+      <Step>Implement handlers in `handlers.ts` using oRPC</Step>
+      <Step>Export from `index.ts`</Step>
+      <Step>Add to main router in `src/ipc/router.ts`</Step>
+    </Steps>
+  </Tab>
+
+  <Tab value="Components">
+    ### Adding New Components
+    
+    <Steps>
+      <Step>
+        Use shadcn/ui CLI:
+        ```bash
+npx shadcn@latest add [component-name]
+        ```
+      </Step>
+      <Step>Component is automatically added to `src/components/ui/`</Step>
+      <Step>`components.json` is updated automatically</Step>
+      <Step>Required dependencies are installed</Step>
+    </Steps>
+  </Tab>
+
+  <Tab value="Pages">
+    ### Adding New Pages
+    
+    <Steps>
+      <Step>Create a new `.tsx` file in `src/routes/`</Step>
+      <Step>Route is automatically discovered by TanStack Router</Step>
+      <Step>Run `npx @tanstack/router-plugin` to regenerate route tree (if needed)</Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+---
+
+## Security Considerations
+
+The template follows these security measures by default:
+
+- **Context Isolation**: Enabled to prevent direct Node.js API access from renderer
+- **Preload Script**: Only exposes necessary Electron APIs to renderer
+- **Zod Validation**: All IPC inputs are validated before processing
+- **Type Safety**: TypeScript ensures type correctness across all layers
+
+---
+
+## Performance Optimizations
+
+The template includes several performance improvements:
+
+- **React Compiler**: Automatic memoization of React components
+- **Vite**: Fast HMR and optimized builds
+- **Tailwind CSS 4.3**: Improved performance over v3
+- **oRPC**: Efficient MessagePort-based IPC with minimal overhead
+
+---
+
+## Configuration Files
+
+<TypeTable type={{
+  forgeConfig: {
+    description: 'Electron Forge configuration',
+    type: 'string',
+    default: 'forge.config.ts',
+  },
+  viteMain: {
+    description: 'Vite configuration for main process',
+    type: 'string',
+    default: 'vite.main.config.mts',
+  },
+  vitePreload: {
+    description: 'Vite configuration for preload script',
+    type: 'string',
+    default: 'vite.preload.config.mts',
+  },
+  viteRenderer: {
+    description: 'Vite configuration for renderer process',
+    type: 'string',
+    default: 'vite.renderer.config.mts',
+  },
+  vitestConfig: {
+    description: 'Vitest testing configuration',
+    type: 'string',
+    default: 'vitest.config.ts',
+  },
+  playwrightConfig: {
+    description: 'Playwright E2E testing configuration',
+    type: 'string',
+    default: 'playwright.config.ts',
+  },
+  tsconfig: {
+    description: 'TypeScript configuration',
+    type: 'string',
+    default: 'tsconfig.json',
+  },
+  biomeConfig: {
+    description: 'Biome linting and formatting configuration',
+    type: 'string',
+    default: 'biome.jsonc',
+  },
+  componentsJson: {
+    description: 'shadcn/ui configuration',
+    type: 'string',
+    default: 'components.json',
+  },
+}} />
+
+---
+
+## Additional Resources
+
+- [Electron Documentation](https://www.electronjs.org/docs)
+- [oRPC Documentation](https://orpc.unnoq.com)
+- [TanStack Router Documentation](https://tanstack.com/router)
+- [shadcn/ui Documentation](https://ui.shadcn.com)
+- [Vite Documentation](https://vitejs.dev)
+- [Electron Forge Documentation](https://www.electronforge.io)
+
+---
+
+*Last updated: {new Date().toISOString()}*
