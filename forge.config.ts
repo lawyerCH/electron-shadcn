@@ -22,12 +22,12 @@ const config: ForgeConfig = {
       build: [
         {
           config: "vite.main.config.mts",
-          entry: "src/main.ts",
+          entry: "src/main/index.ts",
           target: "main",
         },
         {
           config: "vite.preload.config.mts",
-          entry: "src/preload.ts",
+          entry: "src/preload/index.ts",
           target: "preload",
         },
       ],

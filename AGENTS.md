@@ -16,45 +16,59 @@ npm run test:all   # unit + e2e
 npm run package    # electron-forge package → out/
 npm run make       # electron-forge make（生成安装包）
 npm run publish    # electron-forge publish（创建 GitHub draft release，需 GITHUB_TOKEN）
-npm run bump-ui    # 重新执行 `shadcn add -y -o` 更新 src/components/ui 中的全部组件
+npm run bump-ui    # 重新执行 `shadcn add -y -o` 更新 src/renderer/components/ui 中的全部组件
 ```
 
 要求 Node 20+。CI 中 `check` 用 Node 24，`test:e2e` 和 `publish` 用 Node 20。
 
 ## 架构 —— 三个进程，IPC 通过 MessagePort
 
-- `src/main.ts` —— Electron 主进程。创建 `BrowserWindow`（自定义标题栏：`hidden` / `hiddenInset`），接入 `updateElectronApp`，并在 `app.whenReady` 时调用 `setupORPC()`，将 oRPC handler 注册到 `IPC_CHANNELS.START_ORPC_SERVER`。
-- `src/preload.ts` —— 极简：仅把渲染层发来的 `START_ORPC_SERVER` message-port 转发给 `ipcMain`。完整的桥接逻辑放在渲染层，以便 React 拿到类型化的 oRPC 客户端。
-- `src/renderer.ts` → `src/app.tsx` —— 渲染层入口。`app.tsx` 挂载 `<RouterProvider>`，并在 effect 中调用 `syncWithLocalTheme()` + `updateAppLanguage(i18n)`。
+- `src/main/index.ts` —— Electron 主进程。创建 `BrowserWindow`（自定义标题栏：`hidden` / `hiddenInset`），接入 `updateElectronApp`，并在 `app.whenReady` 时调用 `setupORPC()`，将 oRPC handler 注册到 `IPC_CHANNELS.START_ORPC_SERVER`。
+- `src/preload/index.ts` —— 极简：仅把渲染层发来的 `START_ORPC_SERVER` message-port 转发给 `ipcMain`。完整的桥接逻辑放在渲染层，以便 React 拿到类型化的 oRPC 客户端。
+- `src/renderer/main.tsx` —— 渲染层入口。挂载 `<RouterProvider>`，并在 effect 中调用 `syncWithLocalTheme()` + `updateAppLanguage(i18n)`。
 
-IPC 契约（渲染层侧，`src/ipc/manager.ts`）：
+IPC 契约（渲染层侧，`src/renderer/ipc-manager.ts`）：
 1. 渲染层创建一个 `MessageChannel`，通过 `window.postMessage(IPC_CHANNELS.START_ORPC_SERVER, "*", [port2])` 把 `port2` 投递给自己。
 2. Preload 把这个 port 转发到同一通道的 `ipcMain`。
 3. 主进程调用 `rpcHandler.upgrade(serverPort)`，两端共享一个 oRPC `RPCLink`。
 
-新增 IPC 流程：在 `src/ipc/<area>/handlers.ts` 写 oRPC handler，再写一个 `index.ts` 导出一个对象。`src/ipc/router.ts` 里的 router 是手写的字面量对象（`{ app, shell, theme, window }`），**不是**自动生成的。渲染层通过 `@/ipc/manager` 调用类型化客户端（`ipc.client.<area>.<proc>`），封装 hook 放在 `src/actions/*.ts`。
+新增 IPC 流程：在 `src/main/ipc/<area>/handlers.ts` 写 oRPC handler，再写一个 `index.ts` 导出一个对象。`src/main/ipc/router.ts` 里的 router 是手写的字面量对象（`{ app, shell, theme, window }`），**不是**自动生成的。渲染层通过 `@/renderer/ipc-manager` 调用类型化客户端（`ipc.client.<area>.<proc>`），封装 hook 放在 `src/renderer/actions/<area>.ts`。
 
 ## 仓库目录
 
+目录按 **进程** 划分（Electron 社区主流约定）：`main/` / `preload/` / `renderer/`。三个进程边界在文件夹上一眼可见。
+
 ```
 src/
-  main.ts, preload.ts, renderer.ts, app.tsx      # Electron 入口
-  routes/                                        # TanStack Router 文件路由
-    __root.tsx, index.tsx, second.tsx            # second.tsx 是示例页，新项目可删除
+  main/                                          # 主进程
+    index.ts                                     # BrowserWindow 入口
+    ipc/                                         # 主进程 oRPC handlers
+      handler.ts, router.ts, context.ts
+      <area>/{handlers.ts, index.ts}             # app、shell、theme、window
+    utils/{devtools.ts, path.ts}                 # 主进程工具
+  preload/
+    index.ts                                     # 把 message-port 转发给 ipcMain
+  renderer/                                      # 渲染进程
+    main.tsx                                     # 渲染层入口（createRoot + App）
+    ipc-manager.ts                               # MessageChannel + oRPC client
+    routes/                                      # TanStack Router 文件路由
+      __root.tsx, index.tsx, second.tsx          # second.tsx 是示例页，新项目可删除
+    actions/                                     # 对 ipc.client.* 的封装
+    components/
+      ui/                                        # shadcn 组件 —— Biome 中忽略，用 bump-ui 重新生成
+      drag-window-region.tsx, lang-toggle.tsx, toggle-theme.tsx, ...
+    layouts/base-layout.tsx
+    localization/                                # i18next 配置 + per-language JSON
+      locales/{en,zh-CN,zh-TW,ja,pt-BR}.json
+    styles/global.css                            # Tailwind 4 入口 + CSS 变量（oklch）
+    utils/{routes.ts, tailwind.ts}               # 渲染层工具（cn、router setup）
   routeTree.gen.ts                               # 由 @tanstack/router-plugin 自动生成，**禁止手工编辑**
-  ipc/                                           # 主进程 oRPC handlers
-    handler.ts, router.ts, manager.ts, context.ts
-    <area>/{handlers.ts, index.ts}               # app、shell、theme、window
-  actions/                                       # 渲染层对 ipc.client.* 的封装
-  components/
-    ui/                                          # shadcn 组件 —— Biome 中忽略，用 bump-ui 重新生成
-    drag-window-region.tsx, lang-toggle.tsx, toggle-theme.tsx, ...
-  constants/index.ts                             # LOCAL_STORAGE_KEYS、IPC_CHANNELS、inDevelopment
-  localization/                                  # i18next 配置（en、pt-BR）
-  styles/global.css                              # Tailwind 4 入口 + CSS 变量（oklch）
-  tests/unit/                                    # vitest，jsdom，setup.ts 加载 @testing-library/jest-dom
-  tests/e2e/                                     # playwright，使用 electron-playwright-helpers
-  utils/{devtools,path,routes,tailwind}.ts
+  shared/                                        # 跨 main / renderer / preload 共用
+    constants/index.ts                           # LOCAL_STORAGE_KEYS、IPC_CHANNELS、inDevelopment
+    types/{theme-mode.ts, types.d.ts}            # 共享类型
+  tests/
+    unit/                                        # vitest，jsdom，setup.ts 加载 @testing-library/jest-dom
+    e2e/                                         # playwright，使用 electron-playwright-helpers
 forge.config.ts                                  # Electron Forge + VitePlugin + FusesPlugin + GitHub publisher
 vite.main.config.mts                             # 主进程打包
 vite.preload.config.mts                          # preload + codeSplittingFlagPlugin（见 Vite 注意点）
@@ -76,20 +90,20 @@ biome.jsonc                                      # extends ultracite/biome/core 
 
 ## 路由（TanStack Router）
 
-- 文件路由在 `src/routes/`。新增 `foo.tsx` 后 `routeTree.gen.ts` 会在 `npm run start` 时重新生成。
+- 文件路由在 `src/renderer/routes/`。新增 `foo.tsx` 后 `routeTree.gen.ts` 会在 `npm run start` 时重新生成。
 - Router 使用 `createMemoryHistory` —— 没有 URL 栏，别指望深链路由"开箱即用"。
 - `src/routeTree.gen.ts` 入库（未被 gitignore），但**绝对不要手工编辑** —— Biome 已忽略它，CI 也可能重新生成。
 
 ## 样式
 
-- Tailwind 4 通过 `@tailwindcss/vite` 接入（没有 `tailwind.config.js`，配置全部写在 `src/styles/global.css` 的 `@theme` / CSS 变量中）。
-- shadcn 组件位于 `src/components/ui/`，被 Biome 忽略（`biome.jsonc` 中 `!**/ui`），可以放心 `bump-ui` 而不会引入格式噪音。
+- Tailwind 4 通过 `@tailwindcss/vite` 接入（没有 `tailwind.config.js`，配置全部写在 `src/renderer/styles/global.css` 的 `@theme` / CSS 变量中）。
+- shadcn 组件位于 `src/renderer/components/ui/`，被 Biome 忽略（`biome.jsonc` 中 `!**/ui`），可以放心 `bump-ui` 而不会引入格式噪音。
 - Geist 字体（variable + mono）通过 `@fontsource-variable/geist` 引入到 `global.css`。
 
 ## Lint（Ultracite / Biome）
 
 - Biome extends `ultracite/biome/core` + `ultracite/biome/react`。**先跑 `npm run fix` 再跑 `npm run check`** —— 大多数问题会自动修复。
-- 忽略：`node_modules`、`*.d.ts`、`src/components/ui/**`、`src/routeTree.gen.ts`。
+- 忽略：`node_modules`、`*.d.ts`、`src/renderer/components/ui/**`、`src/routeTree.gen.ts`。
 - Globals：`MAIN_WINDOW_VITE_DEV_SERVER_URL`、`MAIN_WINDOW_VITE_NAME`（Electron Forge 注入）。
 - 完整编码约定见 `.github/copilot-instructions.md`（applyTo `*.{ts,tsx,js,jsx}`）—— 大改动前先读一遍。要点：不使用 `forwardRef`（React 19+）、避免 barrel 文件、语义化 HTML、可访问性标签、禁止 `dangerouslySetInnerHTML`、外链带 `rel="noopener"`。
 
@@ -106,15 +120,15 @@ CI 通过 `xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24"` 跑�
 ## 发布
 
 - `npm run publish` 通过 `@electron-forge/publisher-github` 创建 **draft** GitHub release，发布前务必在 GitHub 上审阅。
-- 自动更新指向 `lawyerch/electron-shadcn`，使用 Electron Public Update Service。**如果 fork**，记得改 `src/main.ts`（`checkForUpdates`）的 `repo` 与 `forge.config.ts` 的 publisher `repository.owner/name`。
+- 自动更新指向 `lawyerch/electron-shadcn`，使用 Electron Public Update Service。**如果 fork**，记得改 `src/main/index.ts`（`checkForUpdates`）的 `repo` 与 `forge.config.ts` 的 publisher `repository.owner/name`。
 - `.github/workflows/publish.yaml` 仅 `workflow_dispatch` 触发且运行在 `windows-latest` —— 推送 tag 不会自动发布。
 
 ## 容易踩的坑
 
 - **不要编辑 `routeTree.gen.ts`** —— 重启 `npm run start` 即可重新生成。
 - **不要移除** `vite.preload.config.mts` 中的 `codeSplittingFlagPlugin`。
-- **不要随意改动 `nodeIntegration`** —— context isolation 是有意为之（见 `src/main.ts`）。
-- 这个仓库本身是个 *template* —— `src/routes/second.tsx` 是示例，新应用通常会删掉它（并重新生成 `routeTree.gen.ts`）。
+- **不要随意改动 `nodeIntegration`** —— context isolation 是有意为之（见 `src/main/index.ts`）。
+- 这个仓库本身是个 *template* —— `src/renderer/routes/second.tsx` 是示例，新应用通常会删掉它（并重新生成 `routeTree.gen.ts`）。
 - 本地 agent 目录（`.agents/`、`.claude/`）已在 `.gitignore` 中，**不要提交**。`.claude/skills/*` 是指向 `.agents/skills/*` 的符号链接，避免重复维护。
 - `forge.config.ts` 打包输出在 `out/`（gitignore）。注意区分 `dist/`（TypeScript 输出）和 `.vite/build/`（Vite 中间产物）。
 

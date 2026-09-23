@@ -11,7 +11,7 @@ AI 在阶段二开始前必读本文件；阶段三自检时回看。
 ### 硬规则（linter 强制）
 
 - Biome 通过 `npm run check` / `npm run fix`（extends `ultracite/biome/core` + `react`）
-- 忽略范围：`node_modules` / `*.d.ts` / `src/components/ui/**` / `src/routeTree.gen.ts`
+- 忽略范围：`node_modules` / `*.d.ts` / `src/renderer/components/ui/**` / `src/routeTree.gen.ts`
 - **不用 `forwardRef`**（React 19+ 直接传 ref 为 prop）
 - **不用 barrel 文件**（避免 `index.ts` 聚合再导出）
 - **不写 `dangerouslySetInnerHTML`**（除非绝对必要，且加 review 标记）
@@ -59,7 +59,7 @@ AI 在阶段二开始前必读本文件；阶段三自检时回看。
 
 ### 硬规则
 
-- 三进程边界清晰：`main.ts` / `preload.ts` / `app.tsx` 各司其职
+- 三进程边界清晰：`src/main/` / `src/preload/` / `src/renderer/` 各司其职
 - IPC 走 oRPC + MessagePort（不用 `ipcRenderer.invoke`），新 IPC 流程见 AGENTS.md
 - 路径别名 `@/*` → `./src/*`（四个配置文件都设了，新工具要注册）
 - 不动 `routeTree.gen.ts`、`forge.config.ts`、`vite.preload.config.mts` 的硬约束部分
@@ -68,8 +68,8 @@ AI 在阶段二开始前必读本文件；阶段三自检时回看。
 
 - 模块边界清晰（参考 `api-and-interface-design` / `architecture-design` skills）
 - 单一职责：一个文件一个明确目的
-- 公共逻辑提到 `src/utils/`，业务逻辑留在原地
-- IPC handler / 渲染层 actions / 业务组件 三层分明（见 `src/ipc/<area>/` 与 `src/actions/<area>.ts`）
+- 公共逻辑提到 `src/{main,renderer}/utils/`，业务逻辑留在原地
+- IPC handler / 渲染层 actions / 业务组件 三层分明（见 `src/main/ipc/<area>/` 与 `src/renderer/actions/<area>.ts`）
 
 ---
 
