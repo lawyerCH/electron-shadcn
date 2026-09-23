@@ -11,7 +11,9 @@ function createWindow() {
   const basePath = getBasePath();
   const preload = path.join(basePath, "preload.js");
   const mainWindow = new BrowserWindow({
-    height: 600,
+    height: 800,
+    minHeight: 600,
+    minWidth: 900,
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "hidden",
     trafficLightPosition:
       process.platform === "darwin" ? { x: 5, y: 5 } : undefined,
@@ -23,7 +25,7 @@ function createWindow() {
 
       preload,
     },
-    width: 800,
+    width: 1280,
   });
   ipcContext.setMainWindow(mainWindow);
 
