@@ -5,7 +5,7 @@
   "description": "Electron Forge with shadcn-ui (Vite + Typescript)",
   "license": "MIT",
   "author": "lawyerch",
-  "main": ".vite/build/main.js",
+  "main": ".vite/build/index.js",
   "scripts": {
     "bump-ui": "tsx ./scripts/bump-ui.ts",
     "check": "ultracite check",
