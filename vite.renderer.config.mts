@@ -20,4 +20,10 @@ export default defineConfig({
     },
     preserveSymlinks: true,
   },
+  server: {
+    // Prefer a fixed port so "5173 is in use, trying another one" stays quiet
+    // when another Vite project is already running on the default.
+    port: 5174,
+    strictPort: false,
+  },
 });

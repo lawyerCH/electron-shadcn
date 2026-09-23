@@ -1,13 +1,10 @@
 import path from "node:path";
 import { app, BrowserWindow } from "electron";
 import { ipcMain } from "electron/main";
-import {
-  installExtension,
-  REACT_DEVELOPER_TOOLS,
-} from "electron-devtools-installer";
 import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/ipc/context";
 import { IPC_CHANNELS, inDevelopment } from "./constants";
+import { installDevTools } from "./utils/devtools";
 import { getBasePath } from "./utils/path";
 
 function createWindow() {
@@ -39,16 +36,11 @@ function createWindow() {
   }
 }
 
-async function installExtensions() {
-  try {
-    const result = await installExtension(REACT_DEVELOPER_TOOLS);
-    console.log(`Extensions installed successfully: ${result.name}`);
-  } catch {
-    console.error("Failed to install extensions");
-  }
-}
-
 function checkForUpdates() {
+  if (inDevelopment) {
+    return;
+  }
+
   updateElectronApp({
     updateSource: {
       repo: "LuanRoger/electron-shadcn",
@@ -71,7 +63,7 @@ async function setupORPC() {
 app.whenReady().then(async () => {
   try {
     createWindow();
-    await installExtensions();
+    await installDevTools();
     checkForUpdates();
     await setupORPC();
   } catch (error) {
