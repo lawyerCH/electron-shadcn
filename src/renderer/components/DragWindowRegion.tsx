@@ -1,3 +1,9 @@
+/**
+ * 自定义标题栏：拖动区 + 窗口控制按钮（Win/Linux 显示，Mac 由系统接管）
+ *
+ * 防御性：当 platform 还没拿到时，不渲染 title 文本和按钮，避免
+ * 在 Mac 上误显示为 Win 风格。
+ */
 import { type ReactNode, useEffect, useState } from "react";
 import { getPlatform } from "@/renderer/actions/app";
 import {
@@ -10,35 +16,36 @@ interface DragWindowRegionProps {
   title?: ReactNode;
 }
 
+type Platform = "darwin" | "win32" | "linux" | string;
+
 export default function DragWindowRegion({ title }: DragWindowRegionProps) {
-  const [platform, setPlatform] = useState<string | null>(null);
+  const [platform, setPlatform] = useState<Platform | null>(null);
 
   useEffect(() => {
     let active = true;
-
     getPlatform()
-      .then((value: string) => {
-        if (!active) {
-          return;
+      .then((value: Platform) => {
+        if (active) {
+          setPlatform(value);
         }
-
-        setPlatform(value);
       })
-      .catch((error: unknown) => {
-        console.error("Failed to detect platform", error);
+      .catch(() => {
+        // IPC bridge not ready yet (dev startup race). Leave platform
+        // null so we keep rendering the empty drag area instead of the
+        // wrong variant.
       });
-
     return () => {
       active = false;
     };
   }, []);
 
+  const platformKnown = platform !== null;
   const isMacOS = platform === "darwin";
 
   return (
     <div className="flex w-full items-stretch justify-between">
       <div className="draglayer w-full">
-        {title && !isMacOS && (
+        {!isMacOS && platformKnown && title !== undefined && (
           <div className="flex flex-1 select-none whitespace-nowrap p-2 text-gray-400 text-xs">
             {title}
           </div>
@@ -49,7 +56,7 @@ export default function DragWindowRegion({ title }: DragWindowRegionProps) {
           </div>
         )}
       </div>
-      {!isMacOS && <WindowButtons />}
+      {!isMacOS && platformKnown && <WindowButtons />}
     </div>
   );
 }
@@ -112,7 +119,7 @@ function WindowButtons() {
           <polygon
             fill="currentColor"
             fillRule="evenodd"
-            points="11 1.576 6.583 6 11 10.424 10.424 11 6 6.583 1.576 11 1 10.424 5.417 6 1 1.576 1.576 1 6 5.417 10.424 1"
+            points="11 1.576 6.583 6 11 10.424 10.424 11 6 6.583 1 11 10.424 5.417 6 1 1.576 1 1.576 1 6 5.417 10.424 1"
           />
         </svg>
       </button>

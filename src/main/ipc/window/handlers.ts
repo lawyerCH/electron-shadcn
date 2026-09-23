@@ -2,29 +2,23 @@ import { os } from "@orpc/server";
 import { ipcContext } from "../context";
 
 export const minimizeWindow = os
-  .use(ipcContext.mainWindowContext)
+  .use(ipcContext.mainWindowMiddleware)
   .handler(({ context }) => {
-    const { window } = context;
-
-    window.minimize();
+    context.window.minimize();
   });
 
 export const maximizeWindow = os
-  .use(ipcContext.mainWindowContext)
+  .use(ipcContext.mainWindowMiddleware)
   .handler(({ context }) => {
-    const { window } = context;
-
-    if (window.isMaximized()) {
-      window.unmaximize();
+    if (context.window.isMaximized()) {
+      context.window.unmaximize();
     } else {
-      window.maximize();
+      context.window.maximize();
     }
   });
 
 export const closeWindow = os
-  .use(ipcContext.mainWindowContext)
+  .use(ipcContext.mainWindowMiddleware)
   .handler(({ context }) => {
-    const { window } = context;
-
-    window.close();
+    context.window.close();
   });

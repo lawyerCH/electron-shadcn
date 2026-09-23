@@ -64,8 +64,11 @@ async function setupORPC() {
 
 app.whenReady().then(async () => {
   try {
-    createWindow();
+    // Register the IPC handler BEFORE creating the BrowserWindow so the
+    // renderer's MessageChannel port hand-off (posted as soon as
+    // manager.ts is imported) is never lost to a race.
     await setupORPC();
+    createWindow();
     await installDevTools();
     checkForUpdates();
   } catch (error) {
