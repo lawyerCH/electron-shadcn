@@ -5,8 +5,6 @@
     "module": "ESNext",
     "lib": ["dom", "ESNext"],
     "experimentalDecorators": true,
-    "composite": true,
-    "declaration": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": false,
     "esModuleInterop": true,
@@ -17,7 +15,6 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "outDir": "dist",
     "moduleResolution": "bundler",
     "resolveJsonModule": true
   },
