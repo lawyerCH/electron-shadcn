@@ -1,5 +1,5 @@
 import { SiElectron, SiReact, SiVite } from "@icons-pack/react-simple-icons";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { getAppVersion } from "@/renderer/actions/app";
@@ -7,6 +7,7 @@ import ExternalLink from "@/renderer/components/ExternalLink";
 import LangToggle from "@/renderer/components/LangToggle";
 import NavigationMenu from "@/renderer/components/NavigationMenu";
 import ToggleTheme from "@/renderer/components/ToggleTheme";
+import { Button } from "@/renderer/components/ui/button";
 
 /*
  * Update this page to modify your home page.
@@ -28,7 +29,7 @@ function HomePage() {
   return (
     <>
       <NavigationMenu />
-      <div className="flex h-full flex-col items-center justify-center">
+      <div className="flex h-full flex-col items-center justify-center p-8">
         <div className="flex flex-col items-end justify-center gap-0.5">
           <div className="inline-flex gap-2">
             <SiReact size={iconSize} />
@@ -52,6 +53,10 @@ function HomePage() {
             </div>
           </div>
         </div>
+
+        <Button asChild className="mt-8" size="lg">
+          <Link to="/components">{t("openShowcase")}</Link>
+        </Button>
       </div>
     </>
   );

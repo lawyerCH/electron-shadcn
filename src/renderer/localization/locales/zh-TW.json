@@ -3,5 +3,14 @@
   "documentation": "文件",
   "madeBy": "由 lawyerch 開發",
   "titleHomePage": "首頁",
-  "titleSecondPage": "第二頁"
+  "titleSecondPage": "第二頁",
+  "openShowcase": "查看元件展示",
+  "showcaseTitle": "元件展示",
+  "showcaseDescription": "本範本安裝的每個 shadcn/ui 元件的即時範例。開發新 UI 時可直接複製參考。",
+  "showcaseTabButtons": "按鈕",
+  "showcaseTabForms": "表單",
+  "showcaseTabDisplay": "展示",
+  "showcaseTabFeedback": "回饋",
+  "showcaseTabOverlays": "彈層",
+  "showcaseTabNavigation": "導覽"
 }

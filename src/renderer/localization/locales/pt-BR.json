@@ -3,5 +3,14 @@
   "documentation": "Documentação",
   "madeBy": "Feito por lawyerch",
   "titleHomePage": "Página Inicial",
-  "titleSecondPage": "Segunda Página"
+  "titleSecondPage": "Segunda Página",
+  "openShowcase": "Ver Vitrine de Componentes",
+  "showcaseTitle": "Vitrine de Componentes",
+  "showcaseDescription": "Exemplos ao vivo de todos os componentes shadcn/ui instalados neste modelo. Use como referência de copiar e colar ao construir novas interfaces.",
+  "showcaseTabButtons": "Botões",
+  "showcaseTabForms": "Formulários",
+  "showcaseTabDisplay": "Exibição",
+  "showcaseTabFeedback": "Feedback",
+  "showcaseTabOverlays": "Sobreposições",
+  "showcaseTabNavigation": "Navegação"
 }

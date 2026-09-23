@@ -3,5 +3,14 @@
   "documentation": "ドキュメント",
   "madeBy": "作成者: lawyerch",
   "titleHomePage": "ホーム",
-  "titleSecondPage": "セカンドページ"
+  "titleSecondPage": "セカンドページ",
+  "openShowcase": "コンポーネントショーケースを見る",
+  "showcaseTitle": "コンポーネントショーケース",
+  "showcaseDescription": "このテンプレートにインストールされているすべての shadcn/ui コンポーネントの実例。新規 UI 作成時のコピー＆ペースト用リファレンスとしてご利用ください。",
+  "showcaseTabButtons": "ボタン",
+  "showcaseTabForms": "フォーム",
+  "showcaseTabDisplay": "表示",
+  "showcaseTabFeedback": "フィードバック",
+  "showcaseTabOverlays": "オーバーレイ",
+  "showcaseTabNavigation": "ナビゲーション"
 }

@@ -3,5 +3,14 @@
   "documentation": "Documentation",
   "madeBy": "Made by lawyerch",
   "titleHomePage": "Home Page",
-  "titleSecondPage": "Second Page"
+  "titleSecondPage": "Second Page",
+  "openShowcase": "View Component Showcase",
+  "showcaseTitle": "Component Showcase",
+  "showcaseDescription": "Live examples of every shadcn/ui component installed in this template. Use as a copy-paste reference when building new UI.",
+  "showcaseTabButtons": "Buttons",
+  "showcaseTabForms": "Forms",
+  "showcaseTabDisplay": "Display",
+  "showcaseTabFeedback": "Feedback",
+  "showcaseTabOverlays": "Overlays",
+  "showcaseTabNavigation": "Navigation"
 }
