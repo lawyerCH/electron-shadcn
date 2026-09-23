@@ -120,22 +120,22 @@ CI 通过 `xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24"` 跑�
 
 ## 配套文档 / Companion Docs
 
-本文件（`AGENTS.md`）是机器合约。流程与规范的完整内容在：
+本文件（`AGENTS.md`）是机器合约。流程与规范的完整内容在 `.agents/rules/` 子目录：
 
-- `WORKFLOW.md` —— 三阶四门流程、Git 流程、跨会话连续性、技能路由
-- `STYLE.md` —— 代码 / UI / i18n / 测试 风格规范（硬规则 / 软指南分区）
-- `CHECKLIST.md` —— 阶段三 · 验收 末尾的自检清单（按 A-I 分类）
+- `.agents/rules/WORKFLOW.md` —— 三阶四门流程、Git 流程、跨会话连续性、技能路由
+- `.agents/rules/STYLE.md` —— 代码 / UI / i18n / 测试 风格规范（硬规则 / 软指南分区）
+- `.agents/rules/CHECKLIST.md` —— 阶段三 · 验收 末尾的自检清单（按 A-I 分类）
 
 AI 工作流：
 
 ```
-开 session → 读 AGENTS.md + WORKFLOW.md 顶部 + STATE.md
+开 session → 读 AGENTS.md + .agents/rules/WORKFLOW.md 顶部 + .agents/rules/STATE.md
   ↓
 阶段一 → 写 spec / 走 brainstorming
   ↓
-阶段二 → 实现前必读 STYLE.md 硬规则段；完工前过 CHECKLIST.md A + B
+阶段二 → 实现前必读 .agents/rules/STYLE.md 硬规则段；完工前过 .agents/rules/CHECKLIST.md A + B
   ↓
-阶段三 → 走 CHECKLIST.md 全栏，回填自检结果给人 review
+阶段三 → 走 .agents/rules/CHECKLIST.md 全栏，回填自检结果给人 review
 ```
 
-STATE.md（人在上次 session 末尾更新）记录：进行中任务 / 决策 / 待办 / 已知坑。
+`.agents/rules/STATE.md`（人在上次 session 末尾更新）记录：进行中任务 / 决策 / 待办 / 已知坑。
