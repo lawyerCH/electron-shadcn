@@ -117,3 +117,25 @@ CI 通过 `xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24"` 跑�
 - 这个仓库本身是个 *template* —— `src/routes/second.tsx` 是示例，新应用通常会删掉它（并重新生成 `routeTree.gen.ts`）。
 - 本地 agent 目录（`.agents/`、`.claude/`）已在 `.gitignore` 中，**不要提交**。`.claude/skills/*` 是指向 `.agents/skills/*` 的符号链接，避免重复维护。
 - `forge.config.ts` 打包输出在 `out/`（gitignore）。注意区分 `dist/`（TypeScript 输出）和 `.vite/build/`（Vite 中间产物）。
+
+## 配套文档 / Companion Docs
+
+本文件（`AGENTS.md`）是机器合约。流程与规范的完整内容在：
+
+- `WORKFLOW.md` —— 三阶四门流程、Git 流程、跨会话连续性、技能路由
+- `STYLE.md` —— 代码 / UI / i18n / 测试 风格规范（硬规则 / 软指南分区）
+- `CHECKLIST.md` —— 阶段三 · 验收 末尾的自检清单（按 A-I 分类）
+
+AI 工作流：
+
+```
+开 session → 读 AGENTS.md + WORKFLOW.md 顶部 + STATE.md
+  ↓
+阶段一 → 写 spec / 走 brainstorming
+  ↓
+阶段二 → 实现前必读 STYLE.md 硬规则段；完工前过 CHECKLIST.md A + B
+  ↓
+阶段三 → 走 CHECKLIST.md 全栏，回填自检结果给人 review
+```
+
+STATE.md（人在上次 session 末尾更新）记录：进行中任务 / 决策 / 待办 / 已知坑。
