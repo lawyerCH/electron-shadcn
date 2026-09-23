@@ -103,8 +103,3 @@ out/
 # Tanstack
 .tanstack/
 
-# Local agent tooling
-.agents/
-.claude/
-agent/
-skills-lock.json
