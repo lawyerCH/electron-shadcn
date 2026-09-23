@@ -3,10 +3,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { getAppVersion } from "@/renderer/actions/app";
-import ExternalLink from "@/renderer/components/external-link";
-import LangToggle from "@/renderer/components/lang-toggle";
-import NavigationMenu from "@/renderer/components/navigation-menu";
-import ToggleTheme from "@/renderer/components/toggle-theme";
+import ExternalLink from "@/renderer/components/ExternalLink";
+import LangToggle from "@/renderer/components/LangToggle";
+import NavigationMenu from "@/renderer/components/NavigationMenu";
+import ToggleTheme from "@/renderer/components/ToggleTheme";
 
 /*
  * Update this page to modify your home page.

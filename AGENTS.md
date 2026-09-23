@@ -27,12 +27,12 @@ npm run bump-ui    # 重新执行 `shadcn add -y -o` 更新 src/renderer/compone
 - `src/preload/index.ts` —— 极简：仅把渲染层发来的 `START_ORPC_SERVER` message-port 转发给 `ipcMain`。完整的桥接逻辑放在渲染层，以便 React 拿到类型化的 oRPC 客户端。
 - `src/renderer/main.tsx` —— 渲染层入口。挂载 `<RouterProvider>`，并在 effect 中调用 `syncWithLocalTheme()` + `updateAppLanguage(i18n)`。
 
-IPC 契约（渲染层侧，`src/renderer/ipc-manager.ts`）：
+IPC 契约（渲染层侧，`src/renderer/ipc/manager.ts`）：
 1. 渲染层创建一个 `MessageChannel`，通过 `window.postMessage(IPC_CHANNELS.START_ORPC_SERVER, "*", [port2])` 把 `port2` 投递给自己。
 2. Preload 把这个 port 转发到同一通道的 `ipcMain`。
 3. 主进程调用 `rpcHandler.upgrade(serverPort)`，两端共享一个 oRPC `RPCLink`。
 
-新增 IPC 流程：在 `src/main/ipc/<area>/handlers.ts` 写 oRPC handler，再写一个 `index.ts` 导出一个对象。`src/main/ipc/router.ts` 里的 router 是手写的字面量对象（`{ app, shell, theme, window }`），**不是**自动生成的。渲染层通过 `@/renderer/ipc-manager` 调用类型化客户端（`ipc.client.<area>.<proc>`），封装 hook 放在 `src/renderer/actions/<area>.ts`。
+新增 IPC 流程：在 `src/main/ipc/<area>/handlers.ts` 写 oRPC handler，再写一个 `index.ts` 导出一个对象。`src/main/ipc/rpc-router.ts` 里的 router 是手写的字面量对象（`{ app, shell, theme, window }`），**不是**自动生成的。渲染层通过 `@/renderer/ipc/manager` 调用类型化客户端（`ipc.client.<area>.<proc>`），封装 hook 放在 `src/renderer/actions/<area>.ts`。
 
 ## 仓库目录
 
@@ -43,25 +43,26 @@ src/
   main/                                          # 主进程
     index.ts                                     # BrowserWindow 入口
     ipc/                                         # 主进程 oRPC handlers
-      handler.ts, router.ts, context.ts
+      rpc-handler.ts, rpc-router.ts, context.ts  # oRPC server 设置
       <area>/{handlers.ts, index.ts}             # app、shell、theme、window
     utils/{devtools.ts, path.ts}                 # 主进程工具
   preload/
     index.ts                                     # 把 message-port 转发给 ipcMain
   renderer/                                      # 渲染进程
     main.tsx                                     # 渲染层入口（createRoot + App）
-    ipc-manager.ts                               # MessageChannel + oRPC client
+    ipc/manager.ts                               # MessageChannel + oRPC client
+    router.ts                                    # TanStack Router 实例
     routes/                                      # TanStack Router 文件路由
       __root.tsx, index.tsx, second.tsx          # second.tsx 是示例页，新项目可删除
     actions/                                     # 对 ipc.client.* 的封装
     components/
       ui/                                        # shadcn 组件 —— Biome 中忽略，用 bump-ui 重新生成
-      drag-window-region.tsx, lang-toggle.tsx, toggle-theme.tsx, ...
-    layouts/base-layout.tsx
+      DragWindowRegion.tsx, LangToggle.tsx, ToggleTheme.tsx, ...  # 手写组件 PascalCase
+    layouts/BaseLayout.tsx
     localization/                                # i18next 配置 + per-language JSON
       locales/{en,zh-CN,zh-TW,ja,pt-BR}.json
     styles/global.css                            # Tailwind 4 入口 + CSS 变量（oklch）
-    utils/{routes.ts, tailwind.ts}               # 渲染层工具（cn、router setup）
+    utils/tailwind.ts                            # cn 等工具函数
   routeTree.gen.ts                               # 由 @tanstack/router-plugin 自动生成，**禁止手工编辑**
   shared/                                        # 跨 main / renderer / preload 共用
     constants/index.ts                           # LOCAL_STORAGE_KEYS、IPC_CHANNELS、inDevelopment

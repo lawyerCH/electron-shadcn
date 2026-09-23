@@ -1,5 +1,5 @@
 import type React from "react";
-import DragWindowRegion from "@/renderer/components/drag-window-region";
+import DragWindowRegion from "@/renderer/components/DragWindowRegion";
 
 export default function BaseLayout({
   children,

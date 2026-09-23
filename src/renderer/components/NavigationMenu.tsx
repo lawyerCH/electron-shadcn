@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import ExternalLink from "@/renderer/components/ExternalLink";
 import {
   NavigationMenu as NavigationMenuBase,
   NavigationMenuItem,
@@ -7,7 +8,6 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/renderer/components/ui/navigation-menu";
-import ExternalLink from "./external-link";
 
 export default function NavigationMenu() {
   const { t } = useTranslation();

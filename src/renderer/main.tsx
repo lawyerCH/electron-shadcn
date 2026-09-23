@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import { useTranslation } from "react-i18next";
 import { updateAppLanguage } from "@/renderer/actions/language";
 import { syncWithLocalTheme } from "@/renderer/actions/theme";
-import { router } from "@/renderer/utils/router";
+import { router } from "@/renderer/router";
 import "@/renderer/localization/i18n";
 
 export default function App() {

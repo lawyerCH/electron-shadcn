@@ -205,7 +205,7 @@ AI 在阶段二开始前必读本文件；阶段三自检时回看。
  * <area> area 的 oRPC 过程集合
  * - proc1: 做什么
  * - proc2: 做什么
- * 通过 src/renderer/ipc-manager 暴露给渲染层
+ * 通过 src/renderer/ipc/manager 暴露给渲染层
  */
 ```
 

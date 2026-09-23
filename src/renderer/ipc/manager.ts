@@ -1,7 +1,7 @@
 import { type ClientContext, createORPCClient } from "@orpc/client";
 import { RPCLink } from "@orpc/client/message-port";
 import type { RouterClient } from "@orpc/server";
-import type { router } from "@/main/ipc/router";
+import type { router } from "@/main/ipc/rpc-router";
 import { IPC_CHANNELS } from "@/shared/constants";
 
 type RPCClient = RouterClient<typeof router>;

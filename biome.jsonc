@@ -13,10 +13,43 @@
       "!**/node_modules",
       "!**/*.d.ts",
       "!**/ui",
-      "!**/routerTree.gen.ts"
+      "!**/routeTree.gen.ts"
     ]
   },
   "javascript": {
     "globals": ["MAIN_WINDOW_VITE_DEV_SERVER_URL", "MAIN_WINDOW_VITE_NAME"]
-  }
+  },
+  "linter": {
+    "rules": {
+      "style": {
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": {
+            "filenameCases": ["kebab-case"],
+            "requireAscii": true,
+            "strictCase": true
+          }
+        }
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["src/renderer/components/*.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "error",
+              "options": {
+                "filenameCases": ["PascalCase"],
+                "requireAscii": true,
+                "strictCase": true
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

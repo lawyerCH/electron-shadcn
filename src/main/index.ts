@@ -50,7 +50,7 @@ function checkForUpdates() {
 }
 
 async function setupORPC() {
-  const { rpcHandler } = await import("@/main/ipc/handler");
+  const { rpcHandler } = await import("@/main/ipc/rpc-handler");
 
   ipcMain.on(IPC_CHANNELS.START_ORPC_SERVER, (event) => {
     const [serverPort] = event.ports;

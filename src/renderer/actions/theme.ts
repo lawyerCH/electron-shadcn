@@ -1,4 +1,4 @@
-import { ipc } from "@/renderer/ipc-manager";
+import { ipc } from "@/renderer/ipc/manager";
 import { LOCAL_STORAGE_KEYS } from "@/shared/constants";
 import type { ThemeMode } from "@/shared/types/theme-mode";
 
