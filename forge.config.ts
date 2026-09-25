@@ -52,7 +52,7 @@ const config: ForgeConfig = {
   publishers: [
     {
       config: {
-        draft: true,
+        draft: false,
         prerelease: false,
         repository: {
           name: "electron-shadcn",
@@ -60,8 +60,10 @@ const config: ForgeConfig = {
         },
       },
       /*
-       * Publish release on GitHub as draft.
-       * Remember to manually publish it on GitHub website after verifying everything is correct.
+       * Publish release on GitHub directly (not draft).
+       * The CI workflow (release-on-tag) drives this; if you ever run
+       * `npm run publish` locally, the release will go out immediately
+       * instead of sitting in drafts.
        */
       name: "@electron-forge/publisher-github",
     },

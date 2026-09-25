@@ -1,4 +1,4 @@
-name: Draft Release
+name: Publish Release
 
 on:
   push:
@@ -82,7 +82,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    name: Create draft release
+    name: Publish release
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -102,10 +102,10 @@ jobs:
       - name: Show what we will upload
         run: ls -laR dist
 
-      - name: Create draft release
+      - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          draft: true
+          draft: false
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: dist/**/*
