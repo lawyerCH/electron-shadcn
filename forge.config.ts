@@ -56,7 +56,7 @@ const config: ForgeConfig = {
         prerelease: false,
         repository: {
           name: "electron-shadcn",
-          owner: "lawyerch",
+          owner: "lawyerCH",
         },
       },
       /*
