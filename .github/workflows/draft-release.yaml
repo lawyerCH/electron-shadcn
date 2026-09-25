@@ -1,0 +1,113 @@
+name: Draft Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  # Manual fallback so maintainers can rerun a single-platform build
+  # without pushing a new tag, and so we can trigger the workflow from
+  # the Actions UI when push events on a fork are not delivered.
+  workflow_dispatch:
+
+# Cancel any in-progress run for the same tag; a new tag supersedes the old.
+concurrency:
+  group: publish-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Show disk before cleanup (Unix)
+        if: runner.os != 'Windows'
+        run: df -h /
+
+      - name: Free disk space (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo apt-get clean || true
+          echo "---after cleanup---"
+          df -h /
+
+      - name: Free disk space (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Remove-Item -Recurse -ErrorAction SilentlyContinue "$env:ProgramFiles\dotnet"
+          Remove-Item -Recurse -ErrorAction SilentlyContinue "$env:ProgramFiles\Microsoft SDKs"
+          Get-PSDrive C
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Configure npm fetch retries
+        run: npm config set fetch-retries 3
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build installers
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run make
+
+      - name: Upload installers (for downstream release job)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: installers-${{ runner.os }}
+          path: out/make/**/*
+          retention-days: 1
+          if-no-files-found: error
+
+  release:
+    name: Create draft release
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download all platform installers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: installers-*
+          path: dist
+          merge-multiple: true
+
+      - name: Show what we will upload
+        run: ls -laR dist
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: dist/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
